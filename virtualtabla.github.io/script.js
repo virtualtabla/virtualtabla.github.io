@@ -11,6 +11,26 @@ let output = document.getElementById('output');
 
 let touches = [];
 
+let touchesX = [];
+let touchesY = [];
+
+let intervalOn = false;
+
+const tableOfCombinedSounds = [
+    ["S", "Taa", "Tin", "Ti", "Tun"],
+    ["Ke", "Kraa", "Ktin", "Ktee", "Ktun"],
+    ["Ge", "Dhaa", "Dhin", "Dhee", "Dhun"]
+]
+
+const smallBayaCircle = [0.363, 0.490, 0.145]
+const medBayaCircle = [0.418, 0.497, 0.278]
+const largeBayaCircle = [0.483, 0.487, 0.400]
+
+const smallDayanCircle = [0.498, 0.495, 0.111]
+const medDayanCircle = [0.497, 0.497, 0.210]
+const largeDayanCircle = [0.500, 0.490, 0.301]
+
+
 function handleTouch(e, img) {
     e.preventDefault();
     var rect = img.getBoundingClientRect();
@@ -18,6 +38,8 @@ function handleTouch(e, img) {
         var touch = e.touches[i];
         if (touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
             touches.push( img.id + " x=" + Math.round(touch.clientX) + ", y=" + Math.round(touch.clientY));
+            touchesX.push(touch.clientX);
+            touchesY.push(touch.clientY);
         }
     }
 }
@@ -43,9 +65,48 @@ document.getElementById('reset').onclick = function() {
     output.innerText = '';
 }
 
-/*setInterval(function() {
-    output.innerText = touches.join(' ');
-}, 100);*/
+
+function startRecording() {
+
+    if(intervalOn == false){
+
+        intervalOn = true;
+        
+        setTimeout(function clearTouches() {
+        
+            touchesX = [];
+            touchesY = [];
+
+            if (intervalOn == true){
+                setTimeout(clearTouches, 1000);
+            }
+            
+        }, 750);
+
+    
+        setTimeout(function outputText() {
+        
+            sound = 'S'
+                        
+            if (touchesX.length > 0){
+                sound = findAverageSound(touchesX, touchesY);
+            }
+
+            if (intervalOn == true){
+                setTimeout(outputText, 1000);
+            }
+
+            output.innerText = output.innerText + " " + sound;
+
+        }, 1300);
+
+    } 
+    
+}
+ 
+function stopRecording(){
+    intervalOn = false;
+}
 
 document.getElementById('fullscreen').onclick = function() {
 
@@ -85,10 +146,13 @@ document.getElementById('efullscreen').onclick = function() {
     
 }
 
-function checkInCircle(drum, x, y, widthConstant, heightConstant, radiusConstant){
+function checkInCircle(drum, x, y, circleConstants){
 
     let rect = drum.getBoundingClientRect()
 
+    widthConstant = circleConstants[0]
+    heightConstant = circleConstants[1]
+    radiusConstant = circleConstants[2]
 
     x = (x - (drum.offsetWidth * widthConstant + rect.left)) 
     y = (y - (drum.offsetHeight * heightConstant + rect.top))
@@ -105,26 +169,82 @@ function checkInCircle(drum, x, y, widthConstant, heightConstant, radiusConstant
 
 }
 
-document.addEventListener('click', function(e) {
-    let x = e.pageX;
-    let y = e.pageY; 
 
-    output.innerText = ('X: ' + x + ', Y: ' + y + checkInCircle(baya, x, y, 0.363, 0.490, 0.145));
-});
+function determineSoundBaya(x, y){
 
-function findCoordinates() {
+    if(checkInCircle(baya, x, y, smallBayaCircle) == true){
+        return 1;
+    }
 
-    let x = baya.offsetWidth;
-    let y = baya.offsetHeight;
-
+    else if(checkInCircle(baya, x, y, largeBayaCircle) == true){
+        return 2;
+    }
     
-    return(String(x) + " " + String(y))
+    else{
+        return 0;
+    }
 }
 
-test = document.getElementById('test');
+function determineSoundDayan(x, y){
 
-setInterval(function() {
-    test.innerText = findCoordinates();;
-}, 100);
+    if(checkInCircle(dayan, x, y, smallDayanCircle) == true){
+        return 3;
+    }
+
+    else if(checkInCircle(dayan, x, y, medDayanCircle) == true){
+        return 2;
+    }
+
+    else if(checkInCircle(dayan, x, y, largeDayanCircle) == true){
+        return 1;
+    }
+    
+    else{
+        return 0;
+    }
+
+}
+
+function findAverageSound(xArray, yArray){
+
+
+    bayaArray = [0, 0, 0];
+    dayanArray = [0, 0, 0, 0, 0];
+
+    for(i = 0; i < xArray.length; i++){
+
+        bayaSound = determineSoundBaya(xArray[i], yArray[i]);
+        dayanSound = determineSoundDayan(xArray[i], yArray[i]);
+
+        bayaArray[bayaSound] += 1;
+        dayanArray[dayanSound] +=1;
+    }
+
+    bayaArray[0] = bayaArray[0]/2
+    dayanArray[0] = dayanArray[0]/2
+
+    return tableOfCombinedSounds[indexOfMax(bayaArray)][indexOfMax(dayanArray)];
+
+}
+
+function indexOfMax(arr) {
+    if (arr.length === 0) {
+        return -1; 
+    }
+    let max = arr[0];
+    let maxIndex = 0;
+    for (let i = 1; i < arr.length; i++) {
+        if (arr[i] > max) {
+            maxIndex = i;
+            max = arr[i];
+        }
+    }
+    return maxIndex;
+}
+
+
+
+
+
 
 
