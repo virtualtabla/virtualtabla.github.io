@@ -285,6 +285,7 @@ fullscreenButton.onclick = function() {
     metronomeCheck.style.display = "none"
     a.style.display = "none"
     efullscreenButton.style.display = "flex";
+    document.getElementById('download').style.display = "none";
 
     let viewportWidth = window.innerWidth;                                            // || document.documentElement.clientWidth;
     let viewportHeight = window.innerHeight;                                          // || document.documentElement.clientHeight;
@@ -302,6 +303,25 @@ fullscreenButton.onclick = function() {
     }
 }
 
+document.getElementById('download').onclick = function(){
+    const paragraphContent = output.innerText; // Replace with your actual content
+            const filename = "output.txt"; // Specify the desired filename
+
+            // Create a Blob with the paragraph content
+            const blob = new Blob([paragraphContent], { type: "text/plain" });
+
+            // Create a temporary link to trigger the download
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+
+            // Programmatically click the link to initiate the download
+            link.click();
+
+            // Clean up the temporary URL
+            URL.revokeObjectURL(link.href);
+}
+
 //Exit fullscreen button
 efullscreenButton.onclick = function() {
 
@@ -316,6 +336,7 @@ efullscreenButton.onclick = function() {
     a.style.display = "flex"
     metronomeCheck.style.display = "flex"
     resetButton.style.display = "flex"
+    document.getElementById('download').style.display = "flex";
     
 
     baya.style.width = '20vw';
