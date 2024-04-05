@@ -1,17 +1,22 @@
 let baya = document.getElementById('baya');
 let dayan = document.getElementById('dayan');
 
+let startButton = document.getElementById('start');
+let stopButton = document.getElementById('stop');
+
+let resetButton = document.getElementById('reset');
+
 let fullscreenButton = document.getElementById('fullscreen');
 let efullscreenButton = document.getElementById('efullscreen');
 
-
 let imageBox = document.getElementById('imageBox');
-
 let output = document.getElementById('output');
 
 let bpmInput = document.getElementById('bpm');
+let taalInput = document.getElementById('taalSelect');
 
-let touches = [];
+let interval = 60000 / bpmInput.value;
+let beatsPerCycle = taalInput.value;
 
 let touchesX = [];
 let touchesY = [];
@@ -19,9 +24,22 @@ let touchesY = [];
 let arrayOfSounds = [];
 
 let intervalOn = false;
-let interval = 60000 / bpmInput.value;
+//let interval;
+//let beatsPerCycle;
 
 let beat = new Audio('beat.mp3');
+
+let ke = new Audio('Ke.m4a');
+let ge = new Audio('Ge.m4a');
+let taa = new Audio('Taa.m4a');
+let tin = new Audio('Tin.m4a');
+let ti = new Audio('Ti.m4a');
+let ktee = new Audio('Ktee.m4a');
+let ktin = new Audio('Ktin.m4a');
+let kraa = new Audio('Ktaa.m4a');
+let dhaa = new Audio('Dhaa.m4a');
+let dhin = new Audio('Dhin.m4a');
+let dhee = new Audio('Dhe.m4a');
 
 
 
@@ -43,29 +61,25 @@ const medDayanCircle = [0.497, 0.497, 0.210]
 const largeDayanCircle = [0.500, 0.490, 0.301]
 
 
-//Adds x and y coordinates of a touch to seperate arrays of touch coordinates
-function handleTouch(e, img) {
+
+
+//Records initial touch for left drum
+baya.addEventListener('touchstart', function(e) {
+    handleTouch(e);
+}, false);
+
+function handleTouch(e) {
 
     e.preventDefault();
-    let rect = img.getBoundingClientRect();
 
     for (let i = 0; i < e.touches.length; i++) {
 
         let touch = e.touches[i];
 
-        if (touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-
-            touches.push( img.id + " x=" + Math.round(touch.clientX) + ", y=" + Math.round(touch.clientY));
-            touchesX.push(touch.clientX);
-            touchesY.push(touch.clientY);
-        }
+        touchesX.push(touch.clientX);
+        touchesY.push(touch.clientY);
     }
 }
-
-//Records initial touch for left drum
-baya.addEventListener('touchstart', function(e) {
-    handleTouch(e, baya);
-}, false);
 
 //Records all other touches for left drum
 baya.addEventListener('touchmove', function(e) {
@@ -83,7 +97,7 @@ dayan.addEventListener('touchmove', function(e) {
 }, false);
 
 //Clears the output sounds
-document.getElementById('reset').onclick = function() {
+resetButton.onclick = function() {
     touches = [];
     arrayOfSounds = [];
     output.innerText = '';
@@ -110,17 +124,21 @@ function clearTouches() {
 }
 
 //Plays the metronome beat sound
-function playSound() {
+function playSound(counter) {
 
-    if(beat.paused == false) { //Stops current sound if there is one playing
+    if(beat.paused == false) {
         beat.pause();
         beat.currentTime = 0;
     }
         
-    beat.play(); //Play metronome beat
+    beat.play();
 
-    if (intervalOn == true){ //Checks if stop button has been pressed
-        setTimeout(playSound, interval); //Calls this function again after waiting specified interval
+    if(counter > 600) {
+        intervalOn = false;
+    }
+
+    if (intervalOn == true){ 
+        setTimeout(function() {playSound(counter + 1); }, interval); 
     }
 }
 
@@ -135,6 +153,14 @@ function outputText() {
 
     arrayOfSounds.push(sound)
 
+
+    let audioObject = findAudioObject(sound)
+
+    if(audioObject){
+        audioObject.currentTime = 0.3; 
+        audioObject.play();
+    }
+
     output.innerText = formatSounds(arrayOfSounds);
 
     if (intervalOn == true){
@@ -142,18 +168,51 @@ function outputText() {
     }
 }
 
+function findAudioObject(soundName){
+
+    switch(soundName){
+        
+        case("Ke"):
+            return ke
+        case("Ge"):
+            return ge
+        case("Ti"):
+            return ti
+        case("Taa"):
+            return taa
+        case("Tin"):
+            return tin
+        case("Kraa"):
+            return kraa
+        case("Ktin"):
+            return ktin
+        case("Ktee"):
+            return ktee
+        case("Dhaa"):
+            return dhaa
+        case("Dhin"):
+            return dhin
+        case("Dhee"):
+            return dhee
+        case('S'):
+            return
+    }
+
+}
+
 //Starts the intervals for recording the sounds and metronome
-function startRecording() {
+startButton.onclick =function startRecording() {
 
     if(intervalOn == false){
 
         interval = 60000 / bpmInput.value;
-
         intervalOn = true;
+
+        beatsPerCycle = taalInput.value;
         
         setTimeout(clearTouches, 750);
 
-        setTimeout(playSound, 950);
+        setTimeout(playSound(0), 950);
     
         setTimeout(outputText, 1200);
     } 
@@ -161,56 +220,59 @@ function startRecording() {
 }
 
 //Ends all intervals and stops recording sounds
-function stopRecording() {
+stopButton.onclick = function stopRecording() {
     intervalOn = false;
 }
 
 //Formats the outputted sounds based on beats per cycle of the taal
 function formatSounds(soundArray) {
 
-    let sounds = '';
-    let pairCount = 0;
-
-    for (let i = 1; i < soundArray.length; i++) { //If "Ti" appears twice in a row, changes the second "Ti" to "Ta"
+    //If "Ti" appears twice in a row, changes the second "Ti" to "Ta"
+    for (let i = 1; i < soundArray.length; i++) { 
 
         if (soundArray[i] == 'Ti' && soundArray[i - 1] == 'Ti') {
             soundArray[i] = 'Ta';
         }
     }
 
-    for (let i = 0; i < soundArray.length; i++) { //Loops over sound array to add sounds to a string
+    let sounds = '';
+    let pairCount = 0;
+
+    //Loops over sound array to add sounds to a string
+    for (let i = 0; i < soundArray.length; i++) { 
 
         sounds += soundArray[i];
-
-        if (i % 2 !== 0) { //Puts sounds into pairs seperated by spaces
+         
+        if (i % 2 !== 0) {
 
             pairCount++;
 
-            if (sounds.endsWith('S')) { //Removes "S" if it is the final sound in the pair
+            if (sounds.endsWith('S')) {
                 sounds = sounds.slice(0, -1);
             }
-
-            if (pairCount % 16 == 0) { //Starts a new line if number of pairs is divisible by beats per cycle
+            
+            if (pairCount % beatsPerCycle == 0) {
                 sounds += '\n';
-            }  
-            else { //Adds a space between pairs
+            }
+            else {
                 sounds += ' ';
             }
         }
     }
+
     return sounds;
 }
 
 //Fullscreen button
-document.getElementById('fullscreen').onclick = function() {
+fullscreenButton.onclick = function() {
 
     imageBox.style.width = '100vw';
 
     fullscreenButton.style.display = "none";
     efullscreenButton.style.display = "flex";
 
-    let viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-    let viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    let viewportWidth = window.innerWidth;                                            // || document.documentElement.clientWidth;
+    let viewportHeight = window.innerHeight;                                          // || document.documentElement.clientHeight;
 
     if (viewportWidth < viewportHeight) {
         baya.style.width = '50vw';
@@ -226,7 +288,7 @@ document.getElementById('fullscreen').onclick = function() {
 }
 
 //Exit fullscreen button
-document.getElementById('efullscreen').onclick = function() {
+efullscreenButton.onclick = function() {
 
     imageBox.style.width = '80vw';
 
@@ -236,22 +298,23 @@ document.getElementById('efullscreen').onclick = function() {
     baya.style.width = '20vw';
     baya.style.height = 'auto';
     dayan.style.width = '20vw';
-    dayan.style.height = 'auto';
-    
+    dayan.style.height = 'auto'; 
 }
 
 //Checks if an (x, y) coordinate is inside a specified circle on a drum
-function checkInCircle(drum, xPos, yPos, circleConstants){
+function checkInCircle(drum, x, y, circleConstants){
 
-    let rect = drum.getBoundingClientRect() //Gets coordinates for the edges of the image
+    //Gets coordinates for the edges of the image
+    let rect = drum.getBoundingClientRect() 
 
-    let [widthConstant, heightConstant, radiusConstant] = circleConstants; //Gets scaling constants for a specified circle
+    //Gets scaling constants for a specified circle
+    let [widthConstant, heightConstant, radiusConstant] = circleConstants; 
 
-    x = (xPos - (drum.offsetWidth * widthConstant + rect.left)) 
-    y = (yPos - (drum.offsetHeight * heightConstant + rect.top))
+    xShift = drum.offsetWidth * widthConstant + rect.left
+    yShift = drum.offsetHeight * heightConstant + rect.top
     r = (drum.offsetWidth * radiusConstant) 
 
-    if (x*x + y*y < r*r){
+    if ((x - xShift)*(x - xShift) + (y - yShift)*(y - yShift) < r*r){
         return true
     }
     else {
@@ -259,41 +322,33 @@ function checkInCircle(drum, xPos, yPos, circleConstants){
     }
 }
 
+
 //Returns a number representing a sound on the left drum
+
 function determineSoundBaya(x, y){
-
-    if(checkInCircle(baya, x, y, smallBayaCircle) == true){
+    if(checkInCircle(baya, x, y, smallBayaCircle) == true)
         return 1;
-    }
-
-    else if(checkInCircle(baya, x, y, largeBayaCircle) == true){
-        return 2;
-    }
     
-    else{
-        return 0;
-    }
+    else if(checkInCircle(baya, x, y, largeBayaCircle) == true)
+        return 2;
+    
+    else
+        return 0; 
 }
-
 //Returns a number representing a sound on the right drum
 function determineSoundDayan(x, y){
 
-    if(checkInCircle(dayan, x, y, smallDayanCircle) == true){
+    if(checkInCircle(dayan, x, y, smallDayanCircle) == true)
         return 3;
-    }
 
-    else if(checkInCircle(dayan, x, y, medDayanCircle) == true){
+    else if(checkInCircle(dayan, x, y, medDayanCircle) == true)
         return 2;
-    }
 
-    else if(checkInCircle(dayan, x, y, largeDayanCircle) == true){
+    else if(checkInCircle(dayan, x, y, largeDayanCircle) == true)
         return 1;
-    }
-    
-    else{
-        return 0;
-    }
 
+    else
+        return 0;
 }
 
 //Takes in all coordinate pairs and determines the most likely sound played
@@ -325,7 +380,7 @@ function indexOfMax(arr) {
     let maxIndex = 0;
 
     for (let i = 1; i < arr.length; i++) {
-        
+
         if (arr[i] > max) {
             maxIndex = i;
             max = arr[i];

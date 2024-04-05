@@ -18,20 +18,26 @@ h1 {
     justify-content: center;
     width: 80vw;
 }
-
 #baya{
     width: 20vw;
     height: auto;
 }
-
 #dayan{
     width: 20vw;
     height: auto;
 }
 
 
+
 p {
     text-align: center;
     width: 80%;
 }
+
+#bpmGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+
 
