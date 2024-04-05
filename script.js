@@ -17,6 +17,9 @@ let taalInput = document.getElementById('taalSelect');
 
 let bpmLabel = document.getElementById('bpmLabel');
 let taallabel = document.getElementById('taalLabel');
+let a = document.getElementById('1')
+
+let metronomeCheck = document.getElementById("accept");
 
 let interval = 60000 / bpmInput.value;
 let beatsPerCycle = taalInput.value;
@@ -133,9 +136,11 @@ function playSound(counter) {
         beat.pause();
         beat.currentTime = 0;
     }
-        
-    beat.play();
-
+       
+    if(metronomeCheck.checked){
+        beat.play();
+    }
+ 
     if(counter > 600) {
         intervalOn = false;
     }
@@ -159,7 +164,7 @@ function outputText() {
 
     let audioObject = findAudioObject(sound)
 
-    if(audioObject){
+    if(audioObject && metronomeCheck.checked == false){
         audioObject.currentTime = 0.3; 
         audioObject.play();
     }
@@ -204,7 +209,7 @@ function findAudioObject(soundName){
 }
 
 //Starts the intervals for recording the sounds and metronome
-startButton.onclick =function startRecording() {
+startButton.onclick = function startRecording() {
 
     if(intervalOn == false){
 
@@ -277,6 +282,8 @@ fullscreenButton.onclick = function() {
     taalLabel.style.display = "none";
     bpmLabel.style.display = "none";
     resetButton.style.display = "none"
+    metronomeCheck.style.display = "none"
+    a.style.display = "none"
     efullscreenButton.style.display = "flex";
 
     let viewportWidth = window.innerWidth;                                            // || document.documentElement.clientWidth;
@@ -306,7 +313,10 @@ efullscreenButton.onclick = function() {
     bpmInput.style.display = "flex";
     taalLabel.style.display = "flex";
     bpmLabel.style.display = "flex";
+    a.style.display = "flex"
+    metronomeCheck.style.display = "flex"
     resetButton.style.display = "flex"
+    
 
     baya.style.width = '20vw';
     baya.style.height = 'auto';
