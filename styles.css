@@ -1,0 +1,43 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 95vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+}
+
+#imageBox {
+    display: flex;
+    justify-content: center;
+    width: 80vw;
+}
+#baya{
+    width: 20vw;
+    height: auto;
+}
+#dayan{
+    width: 20vw;
+    height: auto;
+}
+
+
+
+p {
+    text-align: center;
+    width: 80%;
+}
+
+#bpmGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+
+
