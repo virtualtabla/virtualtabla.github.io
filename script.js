@@ -17,9 +17,9 @@ let taalInput = document.getElementById('taalSelect');
 
 let bpmLabel = document.getElementById('bpmLabel');
 let taallabel = document.getElementById('taalLabel');
-let a = document.getElementById('1')
+let metronomeLabel = document.getElementById('metronomeLabel')
 
-let metronomeCheck = document.getElementById("accept");
+let metronomeCheck = document.getElementById("metronome");
 
 let interval = 60000 / bpmInput.value;
 let beatsPerCycle = taalInput.value;
@@ -30,8 +30,7 @@ let touchesY = [];
 let arrayOfSounds = [];
 
 let intervalOn = false;
-//let interval;
-//let beatsPerCycle;
+let audioPlaying = false;
 
 let beat = new Audio('beat.mp3');
 
@@ -47,14 +46,11 @@ let dhaa = new Audio('Dhaa.m4a');
 let dhin = new Audio('Dhin.m4a');
 let dhee = new Audio('Dhe.m4a');
 
-
-
 const tableOfCombinedSounds = [
     ["S", "Taa", "Tin", "Ti"],
     ["Ke", "Kraa", "Ktin", "Ktee"],
     ["Ge", "Dhaa", "Dhin", "Dhee"]
 ]
-
 
 //Scaling constants for left drum
 const smallBayaCircle = [0.363, 0.490, 0.145]
@@ -66,26 +62,10 @@ const smallDayanCircle = [0.498, 0.495, 0.111]
 const medDayanCircle = [0.497, 0.497, 0.210]
 const largeDayanCircle = [0.500, 0.490, 0.301]
 
-
-
-
 //Records initial touch for left drum
 baya.addEventListener('touchstart', function(e) {
     handleTouch(e);
 }, false);
-
-function handleTouch(e) {
-
-    e.preventDefault();
-
-    for (let i = 0; i < e.touches.length; i++) {
-
-        let touch = e.touches[i];
-
-        touchesX.push(touch.clientX);
-        touchesY.push(touch.clientY);
-    }
-}
 
 //Records all other touches for left drum
 baya.addEventListener('touchmove', function(e) {
@@ -101,6 +81,24 @@ dayan.addEventListener('touchstart', function(e) {
 dayan.addEventListener('touchmove', function(e) {
     handleTouch(e, dayan);
 }, false);
+
+function handleTouch(e) {
+
+    e.preventDefault();
+
+    for (let i = 0; i < e.touches.length; i++) {
+
+        let touch = e.touches[i];
+
+        touchesX.push(touch.clientX);
+        touchesY.push(touch.clientY);
+    }
+
+    if(metronomeCheck.checked == false && audioPlaying == false){
+        audioPlaying = true;
+        setTimeout(function() {outputText()}, 125);
+    }
+}
 
 //Clears the output sounds
 resetButton.onclick = function() {
@@ -159,51 +157,77 @@ function outputText() {
         sound = findAverageSound(touchesX, touchesY);
     }
 
-    arrayOfSounds.push(sound)
-
-
-    let audioObject = findAudioObject(sound)
-
-    if(audioObject && metronomeCheck.checked == false){
-        audioObject.currentTime = 0.3; 
-        audioObject.play();
+    if(sound != 'S' || metronomeCheck.checked){
+        arrayOfSounds.push(sound);
     }
 
+    if(metronomeCheck.checked == false){
+        playAudio(sound);
+    }
+ 
     output.innerText = formatSounds(arrayOfSounds);
 
     if (intervalOn == true){
         setTimeout(outputText, interval/2);
     }
+
+    if(audioPlaying){
+        clearTouches();
+        audioPlaying = false;
+    }
+
+    
 }
 
-function findAudioObject(soundName){
+//Plays audio of sound
+function playAudio(soundName){
 
     switch(soundName){
-        
+
         case("Ke"):
-            return ke
+            ke.currentTime = 0.3
+            ke.play()
+            break
         case("Ge"):
-            return ge
+            ge.currentTime = 0.3
+            ge.play()
+            break
         case("Ti"):
-            return ti
+            ti.currentTime = 0.5
+            ti.play()
+            break
         case("Taa"):
-            return taa
+            taa.currentTime = 0.2
+            taa.play()
+            break
         case("Tin"):
-            return tin
+            tin.currentTime = 0.4
+            tin.play()
+            break
         case("Kraa"):
-            return kraa
+            kraa.currentTime = 0.3
+            kraa.play()
+            break
         case("Ktin"):
-            return ktin
+            ktin.currentTime = 0.4
+            ktin.play()
+            break
         case("Ktee"):
-            return ktee
+            ktee.currentTime = 0.3
+            ktee.play()
+            break
         case("Dhaa"):
-            return dhaa
+            dhaa.currentTime = 0.6
+            dhaa.play();
+            break
         case("Dhin"):
-            return dhin
+            dhin.currentTime = 0.4;
+            dhin.play()
+            break
         case("Dhee"):
-            return dhee
-        case('S'):
-            return
+            dhee.currentTime = 0.4
+            dhee.play()
+            break
     }
 
 }
@@ -211,7 +235,7 @@ function findAudioObject(soundName){
 //Starts the intervals for recording the sounds and metronome
 startButton.onclick = function startRecording() {
 
-    if(intervalOn == false){
+    if(intervalOn == false && metronomeCheck.checked){
 
         interval = 60000 / bpmInput.value;
         intervalOn = true;
@@ -251,7 +275,7 @@ function formatSounds(soundArray) {
 
         sounds += soundArray[i];
          
-        if (i % 2 !== 0) {
+        if (i % 2 !== 0 || metronomeCheck.checked == false) {
 
             pairCount++;
 
@@ -283,12 +307,12 @@ fullscreenButton.onclick = function() {
     bpmLabel.style.display = "none";
     resetButton.style.display = "none"
     metronomeCheck.style.display = "none"
-    a.style.display = "none"
+    metronomeLabel.style.display = "none"
     efullscreenButton.style.display = "flex";
     document.getElementById('download').style.display = "none";
 
-    let viewportWidth = window.innerWidth;                                            // || document.documentElement.clientWidth;
-    let viewportHeight = window.innerHeight;                                          // || document.documentElement.clientHeight;
+    let viewportWidth = window.innerWidth;                                             
+    let viewportHeight = window.innerHeight;                                          
 
     if (viewportWidth < viewportHeight) {
         baya.style.width = '50vw';
@@ -303,25 +327,6 @@ fullscreenButton.onclick = function() {
     }
 }
 
-document.getElementById('download').onclick = function(){
-    const paragraphContent = output.innerText; // Replace with your actual content
-            const filename = "output.txt"; // Specify the desired filename
-
-            // Create a Blob with the paragraph content
-            const blob = new Blob([paragraphContent], { type: "text/plain" });
-
-            // Create a temporary link to trigger the download
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-
-            // Programmatically click the link to initiate the download
-            link.click();
-
-            // Clean up the temporary URL
-            URL.revokeObjectURL(link.href);
-}
-
 //Exit fullscreen button
 efullscreenButton.onclick = function() {
 
@@ -333,7 +338,7 @@ efullscreenButton.onclick = function() {
     bpmInput.style.display = "flex";
     taalLabel.style.display = "flex";
     bpmLabel.style.display = "flex";
-    a.style.display = "flex"
+    metronomeLabel.style.display = "flex"
     metronomeCheck.style.display = "flex"
     resetButton.style.display = "flex"
     document.getElementById('download').style.display = "flex";
@@ -343,6 +348,22 @@ efullscreenButton.onclick = function() {
     baya.style.height = 'auto';
     dayan.style.width = '20vw';
     dayan.style.height = 'auto'; 
+}
+
+//Downloads output as txt file
+document.getElementById('download').onclick = function(){
+    const paragraphContent = output.innerText; 
+            const filename = "output.txt"; 
+
+            const blob = new Blob([paragraphContent], { type: "text/plain" });
+
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+
+            link.click();
+
+            URL.revokeObjectURL(link.href);
 }
 
 //Checks if an (x, y) coordinate is inside a specified circle on a drum
@@ -366,9 +387,7 @@ function checkInCircle(drum, x, y, circleConstants){
     }
 }
 
-
 //Returns a number representing a sound on the left drum
-
 function determineSoundBaya(x, y){
     if(checkInCircle(baya, x, y, smallBayaCircle) == true)
         return 1;
@@ -379,6 +398,7 @@ function determineSoundBaya(x, y){
     else
         return 0; 
 }
+
 //Returns a number representing a sound on the right drum
 function determineSoundDayan(x, y){
 
