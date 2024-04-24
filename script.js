@@ -94,7 +94,7 @@ function handleTouch(e) {
         touchesY.push(touch.clientY);
     }
 
-    if(metronomeCheck.checked == false && audioPlaying == false){
+    if(intervalOn == false && audioPlaying == false){
         audioPlaying = true;
         setTimeout(function() {outputText()}, 125);
     }
@@ -157,7 +157,7 @@ function outputText() {
         sound = findAverageSound(touchesX, touchesY);
     }
 
-    if(sound != 'S' || metronomeCheck.checked){
+    if(sound != 'S' || intervalOn){
         arrayOfSounds.push(sound);
     }
 
@@ -235,7 +235,7 @@ function playAudio(soundName){
 //Starts the intervals for recording the sounds and metronome
 startButton.onclick = function startRecording() {
 
-    if(intervalOn == false && metronomeCheck.checked){
+    if(intervalOn == false){
 
         interval = 60000 / bpmInput.value;
         intervalOn = true;
@@ -275,7 +275,7 @@ function formatSounds(soundArray) {
 
         sounds += soundArray[i];
          
-        if (i % 2 !== 0 || metronomeCheck.checked == false) {
+        if (i % 2 !== 0 || intervalOn == false) {
 
             pairCount++;
 
